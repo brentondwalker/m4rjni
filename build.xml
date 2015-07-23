@@ -13,11 +13,10 @@
     
     <target name="build" description="Compile the classes">
       <mkdir dir="bin"/>
-      <javac srcdir="src/" destdir="bin" deprecation="on"/>
+      <javac srcdir="src/" destdir="bin" deprecation="on" includeantruntime="false" />
     </target>
 
     <target name="jar" depends="build" description="Create JAR file">
-      <mkdir dir="build"/>
       <jar jarfile="build/${ant.project.name}.jar" basedir="bin"/>
     </target>
 
