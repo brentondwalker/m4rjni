@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <m4ri/config.h>
+//#include <m4ri/config.h>
 #include <m4ri/m4ri.h>
 #include "Mzd.h"
 

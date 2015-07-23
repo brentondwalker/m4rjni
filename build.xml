@@ -1,42 +1,47 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
-<project name="m4rijni" default="build" basedir=".">
+<project name="m4rijni" default="jni" basedir=".">
 
   <property name="version" value="0.1"/>
   <property name="buildnumber" value="1"/>
+  <!--
+  <property environment="env"/>
+  <echo message="JAVA_HOME is set to = ${env.JAVA_HOME}" />
+  <echoproperties/>
+  -->
 
   <tstamp>
     <format property="this_year" pattern="yyyy"/>
   </tstamp>
 
-    <property name="copyright" value="Copyright &#xa9; ${this_year} Brenton Walker"/>
-    
-    <target name="build" description="Compile the classes">
-      <mkdir dir="bin"/>
-      <javac srcdir="src/" destdir="bin" deprecation="on" includeantruntime="false" />
-    </target>
+  <property name="copyright" value="Copyright &#xa9; ${this_year} Brenton Walker"/>
+  
+  <target name="build" description="Compile the classes">
+    <mkdir dir="bin"/>
+    <javac srcdir="src/" destdir="bin" deprecation="on" includeantruntime="false" />
+  </target>
 
-    <target name="jar" depends="build" description="Create JAR file">
-      <jar jarfile="build/${ant.project.name}.jar" basedir="bin"/>
-    </target>
+  <target name="headers" depends="build" description="Create JNI header">
+    <mkdir dir="jni"/>
+    <javah destdir="./jni" force="yes" classpath="./bin" class="Mzd" />
+  </target>
 
-    <target name="headers" depends="build" description="Create JNI header">
-      <mkdir dir="jni"/>
-      <javah destdir="./jni" force="yes" classpath="./bin" class="Mzd" />
-    </target>
+  <target name="jni"  depends="headers" description="Build the JNI lib">
+    <exec executable="gcc">
+      <arg line="-c"/>
+      <arg line="-std=gnu99"/>
+      <arg line="-fPIC"/>
+      <arg line="jni/m4rjni.c"/>
+      <arg line="-o bin/m4rjni.o"/>
+      <arg line="-I${java.home}/../include/"/>
+      <arg line="-I${java.home}/../include/linux/"/>
+      <!-- <arg line="-I../topology/m4ri/"/> -->
+    </exec>
+  </target>
 
-    <target name="jni"  depends="headers" description="Build the JNI lib">
-      <mkdir dir="build"/>
-      <exec executable="gcc">
-        <arg line="-c"/>
-        <arg line="-std=gnu99"/>
-        <arg line="-fPIC"/>
-        <arg line="jni/m4rjni.c"/>
-        <arg line="-o bin/m4rjni.o"/>
-        <arg line="-I/usr/lib/jvm/jdk1.7.0/include/"/>
-        <arg line="-I/usr/lib/jvm/jdk1.7.0/include/linux/"/>
-        <arg line="-I../topology/m4ri/"/>
-      </exec>
-    </target>
+  <target name="clean">
+    <delete dir="./bin"/>
+    <delete file="./jni/Mzd.h"/>
+  </target>
 
 </project>
