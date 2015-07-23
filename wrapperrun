@@ -1,0 +1,1 @@
+LD_LIBRARY_PATH=.:../m4ri/.libs java -Djava.library.path=.:../m4ri/.libs -cp bin M4riMain
