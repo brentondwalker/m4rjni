@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <m4ri/config.h>
 #include <m4ri/m4ri.h>
-#include "MzdJNI.h"
+#include "Mzd.h"
 
 
 /*

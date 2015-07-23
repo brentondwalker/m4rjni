@@ -1,7 +1,0 @@
-# also needed 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.'
-
-gcc -c -std=gnu99 -fPIC m4ri_wrapper.c -o m4ri_wrapper.o -I/usr/lib/jvm/jdk1.7.0/include/ -I/usr/lib/jvm/jdk1.7.0/include/linux/ -I../m4ri/
-
-gcc -shared m4ri_wrapper.o -o libm4ri_wrapper.so -lm4ri
-
-
