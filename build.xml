@@ -24,7 +24,7 @@
   <target name="headers" depends="build" description="Create JNI header">
     <javah destdir="./jni" force="yes" classpath="bin" class="m4rjni.Mzd" />
   </target>
-
+  
   <target name="jni"  depends="headers" description="Build the JNI lib">
   	<mkdir dir="lib"/>
     <exec executable="gcc">
@@ -38,13 +38,19 @@
       <arg line="-Iext/m4ri-20140914/" />
     </exec>
   	<exec executable="gcc">
-        <arg line="-shared" />
-  		<arg line="lib/m4rjni.o" />
-        <arg line="-o lib/libm4rjni.so" />
-  		<arg line="-lm4ri" />
+      <arg line="-shared" />
+  	  <arg line="lib/m4rjni.o" />
+      <arg line="-o lib/libm4rjni.so" />
+  	  <arg line="-lm4ri" />
   	</exec>
   </target>
   
+  <target name="m4ri" description="Build the m4ri library from source">
+	<exec executable="bash">
+	  <arg line="-c 'cd ext; tar zxvf m4ri-20140914.tar.gz; cd m4ri-20140914; ./configure; make' " />
+	</exec>
+  </target>	
+	
   <target name="clean">
     <delete dir="./bin"/>
   	<delete dir="./lib"/>
