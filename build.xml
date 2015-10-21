@@ -23,7 +23,7 @@
 
   <target name="headers" depends="build" description="Create JNI header">
     <mkdir dir="jni"/>
-    <javah destdir="./jni" force="yes" classpath="./bin" class="Mzd" />
+    <javah destdir="./jni" force="yes" classpath="bin" class="m4rjni.Mzd" />
   </target>
 
   <target name="jni"  depends="headers" description="Build the JNI lib">
@@ -41,7 +41,7 @@
 
   <target name="clean">
     <delete dir="./bin"/>
-    <delete file="./jni/Mzd.h"/>
+    <delete file="./jni/m4rjni_Mzd.h"/>
   </target>
 
 </project>
