@@ -20,7 +20,7 @@ public class Mzd {
 
     /*
      * the main class variable is a pointer to the mzd_t object,
-     * stored here as an int. Also the matrix dimensions
+     * stored here as a long int. Also the matrix dimensions
      */
     protected long _mzd_t_pointer = -1;
     protected int _m, _n;
@@ -30,7 +30,7 @@ public class Mzd {
         /*
          * load the necessary shared libraries
          */
-        System.loadLibrary("m4ri_wrapper");
+        System.loadLibrary("m4rjni");
         System.loadLibrary("m4ri");
 
         m4ri_init();
@@ -50,18 +50,15 @@ public class Mzd {
      */
     protected void sanityCheck() {
         if (_mzd_t_pointer==-1) {
-            System.out.println("ERROR: called an Mzd method on an un-allocated matrix.");
-            System.exit(-1);
+        	throw new IllegalStateException("ERROR: called an Mzd method on an un-allocated matrix.");
         }
     }
     protected void sanityCheck(int x, int y) {
         if (_mzd_t_pointer==-1) {
-            System.out.println("ERROR: called an Mzd method on an un-allocated matrix.");
-            System.exit(-1);
+        	throw new IllegalStateException("ERROR: called an Mzd method on an un-allocated matrix.");
         }
         if ((x<0) || (y<0) || (x>_m) || (y>_n)) {
-            System.out.println("ERROR: passed in invalid row and column: ("+x+" , "+y+")");
-            System.exit(-1);
+        	throw new ArrayIndexOutOfBoundsException("ERROR: passed in invalid row and column: ("+x+" , "+y+")");
         }
     }
 	
@@ -86,8 +83,7 @@ public class Mzd {
     private native long mzd_copy(long ptr);
     public Mzd(Mzd A) {
         if (A==null) {
-            System.out.println("ERROR: trying to use copy constructor with a null object!");
-            System.exit(-1);
+        	throw new NullPointerException("ERROR: trying to use Mzd copy constructor with a null object!");
         }
 		
         _mzd_t_pointer = mzd_copy(A._mzd_t_pointer);
@@ -107,8 +103,7 @@ public class Mzd {
     private native static int mzd_get_ncols(long ptr);
     private Mzd(long ptr) {
         if (ptr == 0) {
-            System.out.println("ERROR: trying to use wrapper constructor on a null object!");
-            System.exit(-1);
+            throw new NullPointerException("ERROR: trying to use wrapper constructor on a null object!");
         }
         _mzd_t_pointer = ptr;
         _m = mzd_get_nrows(ptr);
@@ -123,8 +118,7 @@ public class Mzd {
      */
     public Mzd(int[][] X) {
         if (X==null) {
-            System.out.println("ERROR: trying to use int-matrix constructor on a null object!");
-            System.exit(-1);
+            throw new NullPointerException("ERROR: trying to use int-matrix constructor on a null object!");
         }
         this._m = X.length;
         this._n = X[0].length;
@@ -347,7 +341,8 @@ public class Mzd {
         this.sanityCheck();
         return (mzd_is_zero(this._mzd_t_pointer)!=0);
     }
-	
+
+    
     /**
      * Naive cubic matrix multiplication.
      * 
@@ -375,7 +370,7 @@ public class Mzd {
      * Compute new matrix C such that C == [this] + [B].
      * 
      * I am pretty sure this gives a new Mzd object that needs to be disposed later
-     * Should really make this static
+     * Non-static version, operates on "this".
      * 
      * @param B
      * @return C
@@ -384,8 +379,7 @@ public class Mzd {
     public Mzd add(Mzd B) {
         this.sanityCheck();
         if (B._m != this._m || B._n != this._n) {
-            System.out.println("ERROR: Add() - dimensions of matrices don't match.");
-            return null;
+        	throw new IllegalArgumentException("ERROR: Mzd.add() - dimensions of matrices don't match.");
         }
         long Cptr = mzd_add(this._mzd_t_pointer, B._mzd_t_pointer);
         if (Cptr==0) {
@@ -393,7 +387,8 @@ public class Mzd {
         }
         return new Mzd(Cptr);
     }
-
+    
+    
     /**
      * Same thing as above, but static method
      * 
@@ -405,8 +400,7 @@ public class Mzd {
         A.sanityCheck();
         B.sanityCheck();
         if (B._m != A._m || B._n != A._n) {
-            System.out.println("ERROR: Add() - dimensions of matrices don't match.");
-            return null;
+        	throw new IllegalArgumentException("ERROR: Mzd.add() - dimensions of matrices don't match.");
         }
         long Cptr = mzd_add(A._mzd_t_pointer, B._mzd_t_pointer);
         if (Cptr==0) {
@@ -495,8 +489,7 @@ public class Mzd {
         A.sanityCheck();
         B.sanityCheck();
         if (i<0 || j<0 || (i+numRows)>B._m || (j+numRows)>A._m) {
-            System.out.println("ERROR: copyRows() - passed invalid row indices: ("+i+","+j+","+numRows+")");
-            return;
+        	throw new IllegalArgumentException("ERROR: Mzd.copyRows() - passed invalid row indices: ("+i+","+j+","+numRows+")");
         }
 		
         mzd_copy_rows(B._mzd_t_pointer, i, A._mzd_t_pointer, j, numRows);
@@ -593,8 +586,7 @@ public class Mzd {
         this.sanityCheck(lowr, lowc);
         this.sanityCheck(highr, highc);
         if ((lowr>=highr) || (lowc>=highc)) {
-            System.out.println("ERROR: submatrix() called with nonsense rows and columns");
-            return null;
+        	throw new IllegalArgumentException("ERROR: Mzd.submatrix() called with nonsense rows and columns");
         }
         //System.out.println("\t...passed sanity checks.");
 		
@@ -624,12 +616,10 @@ public class Mzd {
     public static Mzd vsIntersect(Mzd U, Mzd W) {
         //System.out.println("vsIntersect()");
         if (U==null || W==null) {
-            System.out.println("ERROR: vsIntersect() called with null matrix.");
-            return null;
+        	throw new NullPointerException("ERROR: Mzd.vsIntersect() called with null matrix.");
         }
         if (U.getNcols() != W.getNcols()) {
-            System.out.println("ERROR: vsIntersect() called with matrices of different dimension.");
-            return null;
+            throw new IllegalArgumentException("ERROR: vsIntersect() called with matrices of different dimension.");
         }
 
         int numcols = U.getNcols();
