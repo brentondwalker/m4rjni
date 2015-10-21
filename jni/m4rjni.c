@@ -98,7 +98,19 @@ JNIEXPORT jint JNICALL Java_m4rjni_Mzd_mzd_1get_1ncols(JNIEnv *env, jclass obj, 
 JNIEXPORT void JNICALL Java_m4rjni_Mzd_mzd_1write_1bit(JNIEnv *env, jobject obj, jlong ptr, jint row, jint col, jint val) {
   mzd_t *M = (mzd_t*)ptr;
   if (M==NULL) return;
-  mzd_write_bit(M, row, col, val);
+  rci_t rrow = row;
+  rci_t rcol = col;
+  rci_t rval = val;
+  if (rrow<0 || rrow>=M->nrows) {
+    printf("M4RJNI ERROR: invalid row index\n");
+    return;
+  }
+  if (rcol<0 || rcol>=M->ncols) {
+    printf("M4RJNI ERROR: invalid column index\n");
+    return;
+  }
+  //printf("Java_m4rjni_Mzd_mzd_1write_1bit(%016lX, %d, %d, %d)\n",ptr,rrow,rcol,rval);
+  mzd_write_bit(M, rrow, rcol, rval);
 }
 
 /*
@@ -109,7 +121,17 @@ JNIEXPORT void JNICALL Java_m4rjni_Mzd_mzd_1write_1bit(JNIEnv *env, jobject obj,
 JNIEXPORT jint JNICALL Java_m4rjni_Mzd_mzd_1read_1bit(JNIEnv *env, jobject obj, jlong ptr, jint row, jint col) {
   mzd_t *M = (mzd_t*)ptr;
   if (M==NULL) return -1;
-  return mzd_read_bit(M, row, col);
+  rci_t rrow = row;
+  rci_t rcol = col;
+  if (rrow<0 || rrow>=M->nrows) {
+    printf("M4RJNI ERROR: invalid row index\n");
+    return -1;
+  }
+  if (rcol<0 || rcol>=M->ncols) {
+    printf("M4RJNI ERROR: invalid column index\n");
+    return -1;
+  }
+  return mzd_read_bit(M, rrow, rcol);
 }
 
 /*
@@ -190,12 +212,12 @@ JNIEXPORT jlong JNICALL Java_m4rjni_Mzd_mzd_1concat(JNIEnv *env, jclass obj, jlo
   mzd_t *A = (mzd_t*)Aptr;
   mzd_t *B = (mzd_t*)Bptr;
   if (A==NULL || B==NULL) return -1;
-  return (jlong)mzd_concat(A,B,NULL);
+  return (jlong)mzd_concat(NULL,A,B);
 }
 
 /*
  * Class:     m4rjni_Mzd
- * Method:    mzd_concat
+ * Method:    mzd_stack
  * Signature: (JJ)J
  */
 JNIEXPORT jlong JNICALL Java_m4rjni_Mzd_mzd_1stack(JNIEnv *env, jclass obj, jlong Aptr, jlong Bptr) {

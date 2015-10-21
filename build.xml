@@ -4,6 +4,19 @@
 
   <property name="version" value="0.1"/>
   <property name="buildnumber" value="1"/>
+  <property name="junit.output.dir" value="junit"/>
+  
+  <path id="JUnit 4.libraryclasspath">
+    <pathelement location="lib/junit.jar"/>
+    <pathelement location="lib/org.hamcrest.core_1.3.0.v201303031735.jar"/>
+  </path>
+
+	
+  <path id="m4rjni.classpath">
+    <pathelement location="bin"/>
+    <path refid="JUnit 4.libraryclasspath"/>
+  </path>
+	
   <!--
   <property environment="env"/>
   <echo message="JAVA_HOME is set to = ${env.JAVA_HOME}" />
@@ -18,7 +31,22 @@
   
   <target name="build" description="Compile the classes">
     <mkdir dir="bin"/>
-    <javac srcdir="src/" destdir="bin" deprecation="on" includeantruntime="false" />
+  	<javac srcdir="src/" destdir="bin" deprecation="on" includeantruntime="false" />
+  </target>
+
+  <target name="test" depends="jni,m4rjni.MzdTest" />
+  <target name="m4rjni.MzdTest">
+  	<javac srcdir="test/" destdir="bin" deprecation="on" includeantruntime="false">
+      <classpath refid="m4rjni.classpath"/>
+    </javac>
+    <mkdir dir="${junit.output.dir}"/>
+  	<!-- the fork=yes here is essential, since we want the VM invoked with a different java.library.path -->
+    <junit fork="yes" printsummary="withOutAndErr">
+        <formatter type="xml"/>
+        <test name="m4rjni.MzdTest" todir="${junit.output.dir}"/>
+        <classpath refid="m4rjni.classpath"/>
+    	<sysproperty key="java.library.path" value="${java.library.path}:${user.dir}/lib:${user.dir}/ext/m4ri-20130416/.libs"/>
+    </junit>
   </target>
 
   <target name="headers" depends="build" description="Create JNI header">
@@ -35,7 +63,7 @@
       <arg line="-o lib/m4rjni.o" />
       <arg line="-I${java.home}/../include/" />
       <arg line="-I${java.home}/../include/linux/" />
-      <arg line="-Iext/m4ri-20140914/" />
+      <arg line="-Iext/m4ri-20130416/" />
     </exec>
   	<exec executable="gcc">
       <arg line="-shared" />
@@ -46,14 +74,17 @@
   </target>
   
   <target name="m4ri" description="Build the m4ri library from source">
+  	<!-- the latest release of m4ri (20140914) is full of bugs!  Use the older version. -->
 	<exec executable="bash">
-	  <arg line="-c 'cd ext; tar zxvf m4ri-20140914.tar.gz; cd m4ri-20140914; ./configure; make' " />
+	  <arg line="-c 'cd ext; tar zxvf m4ri-20130416.tar.gz; cd m4ri-20130416; ./configure; make' " />
 	</exec>
   </target>	
 	
   <target name="clean">
     <delete dir="./bin"/>
-  	<delete dir="./lib"/>
+    <delete dir="./junit"/>
+    <delete file="./lib/m4rjni.o"/>
+  	<delete file="./lib/libm4rjni.so"/>
     <!-- <delete file="./jni/m4rjni_Mzd.h"/> -->
   </target>
 

@@ -39,7 +39,12 @@ public class Mzd {
         /*
          * load the necessary shared libraries
          */
-
+    	//System.err.println("Attempt to load libraries...");
+		//String s = System.getProperty("java.library.path");
+		//System.err.println("java.library.path = "+s);
+		//s = System.getProperty("user.dir");
+		//System.err.println("user.dir = "+s);
+    	
     	System.loadLibrary("m4rjni");
         System.loadLibrary("m4ri");
 
@@ -53,6 +58,12 @@ public class Mzd {
      */
     public static void main(String[] args) {
     	Mzd m = new Mzd(10,10);
+    	m.writeBit(1, 1, 1);
+    	m.print();
+    	m.writeBit(2, 2, 1);
+    	m.print();
+    	m.writeBit(3, 3, 1);
+    	m.print();
     	Mzd.srandom(1);
     	m.randomize();
     	m.print();
@@ -129,6 +140,8 @@ public class Mzd {
     /**
      * handy constructor to initialize a matrix from an array of integers.
      * 
+     *XXX this is not working right now!!
+     * 
      * @param X
      */
     public Mzd(int[][] X) {
@@ -137,8 +150,11 @@ public class Mzd {
         }
         this._m = X.length;
         this._n = X[0].length;
-        _mzd_t_pointer = mzd_init(_m,_n);
-		
+        this._mzd_t_pointer = mzd_init(_m,_n);
+		if (_mzd_t_pointer == 0) {
+			throw new NullPointerException("ERROR: failed to allocate new Mzd in matrix constructor");
+		}
+        
         for (int i=0; i<_m; i++) {
             for (int j=0; j<_n; j++) {
                 this.writeBit(i, j, X[i][j]%2);
@@ -190,7 +206,9 @@ public class Mzd {
      */
     private native void mzd_write_bit(long ptr, int row, int col, int val);
     public void writeBit(int row, int col, int val) {
-        sanityCheck(row,col);
+    	//System.err.println("writeBit( "+row+" , "+col+" , "+val+" )");
+    	//System.err.flush();
+    	sanityCheck(row,col);
         mzd_write_bit(_mzd_t_pointer, row, col, val);
     }
 
