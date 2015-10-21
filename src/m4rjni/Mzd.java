@@ -27,24 +27,37 @@ public class Mzd {
     protected long _mzd_t_pointer = -1;
     protected int _m, _n;
 	
-    static 
-    {
-        /*
-         * load the necessary shared libraries
-         */
-        System.loadLibrary("m4rjni");
-        System.loadLibrary("m4ri");
-
-        m4ri_init();
-    }
-
     /**
      * native method to initialize m4ri data structures.
      * I'm not sure this is really necessary to call; mdz_init() may take care of
      * things if the aren't init'ed already.
      */
     private static native void m4ri_init();
-	
+        
+    static 
+    {
+        /*
+         * load the necessary shared libraries
+         */
+
+    	System.loadLibrary("m4rjni");
+        System.loadLibrary("m4ri");
+
+        m4rjni.Mzd.m4ri_init();
+    }
+
+    /**
+     * main() method just for demonstration.
+     * 
+     * @param args
+     */
+    public static void main(String[] args) {
+    	Mzd m = new Mzd(10,10);
+    	Mzd.srandom(1);
+    	m.randomize();
+    	m.print();
+    }
+    
 	
     /**
      * Useful method to run in each accessor before doing anything else.

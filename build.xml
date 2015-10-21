@@ -22,26 +22,33 @@
   </target>
 
   <target name="headers" depends="build" description="Create JNI header">
-    <mkdir dir="jni"/>
     <javah destdir="./jni" force="yes" classpath="bin" class="m4rjni.Mzd" />
   </target>
 
   <target name="jni"  depends="headers" description="Build the JNI lib">
+  	<mkdir dir="lib"/>
     <exec executable="gcc">
-      <arg line="-c"/>
-      <arg line="-std=gnu99"/>
+   	  <arg line="-c" />
+      <arg line="-std=gnu99" />
       <arg line="-fPIC"/>
-      <arg line="jni/m4rjni.c"/>
-      <arg line="-o bin/m4rjni.o"/>
-      <arg line="-I${java.home}/../include/"/>
-      <arg line="-I${java.home}/../include/linux/"/>
-      <!-- <arg line="-I../topology/m4ri/"/> -->
+      <arg line="jni/m4rjni.c" />
+      <arg line="-o lib/m4rjni.o" />
+      <arg line="-I${java.home}/../include/" />
+      <arg line="-I${java.home}/../include/linux/" />
+      <arg line="-Iext/m4ri-20140914/" />
     </exec>
+  	<exec executable="gcc">
+        <arg line="-shared" />
+  		<arg line="lib/m4rjni.o" />
+        <arg line="-o lib/libm4rjni.so" />
+  		<arg line="-lm4ri" />
+  	</exec>
   </target>
-
+  
   <target name="clean">
     <delete dir="./bin"/>
-    <delete file="./jni/m4rjni_Mzd.h"/>
+  	<delete dir="./lib"/>
+    <!-- <delete file="./jni/m4rjni_Mzd.h"/> -->
   </target>
 
 </project>
