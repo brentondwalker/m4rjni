@@ -5,6 +5,8 @@ import m4rjni.Mzd;
 
 import org.junit.Test;
 
+//TODO - most of these don't test how the methods handle bad input
+
 public class MzdTest {
 
 	@Test
@@ -149,7 +151,7 @@ public class MzdTest {
 			Mzd me = new Mzd(arre);
 			int rank = m.echelonize(true);
 			assertEquals(4, rank);
-			// should really just test that there's nothing below the diagonal
+			// to test non-full version could just test that there's nothing below the diagonal
 			assert(m.equals(me));
 			m.destroy();
 			me.destroy();
@@ -257,12 +259,43 @@ public class MzdTest {
 
 	@Test
 	public void testAddMzd() {
-		//TODO
+		// this one behaves not like you'd expect.
+		// calling m.add(n) you'd expect the result to modify m,
+		// but in fact m is unchanged and it returns a new matrix.
+		// maybe should change this.  But it would be hiding the
+		// underlying behavior of m4ri.
+		{
+			int[][] arr =
+				{
+					{0,1,0,1,0},
+					{0,0,1,0,0},
+					{1,1,0,1,0},
+					{1,0,1,0,0}
+				};
+			Mzd m = new Mzd(arr);
+			Mzd ms = m.add(m);
+			assert(ms.isZero());
+			m.destroy();
+			ms.destroy();
+		}
 	}
 
 	@Test
 	public void testAddMzdMzd() {
-		//TODO
+		{
+			int[][] arr =
+				{
+					{0,1,0,1,0},
+					{0,0,1,0,0},
+					{1,1,0,1,0},
+					{1,0,1,0,0}
+				};
+			Mzd m = new Mzd(arr);
+			Mzd ms = Mzd.add(m,m);
+			assert(ms.isZero());
+			m.destroy();
+			ms.destroy();
+		}
 	}
 
 	@Test
@@ -287,32 +320,107 @@ public class MzdTest {
 
 	@Test
 	public void testStandardBasis() {
-		//TODO
+		int dim = 10;
+		Mzd[] basis = Mzd.standardBasis(dim);
+		for (int i=0; i<dim; i++) {
+			assertEquals(1, basis[i].readBit(0, i));
+			basis[i].writeBit(0, i, 0);
+			assert(basis[i].isZero());
+			basis[i].destroy();
+		}
 	}
 
 	@Test
 	public void testIdentityMatrix() {
-		//TODO
+		int dim = 10;
+		Mzd m = Mzd.identityMatrix(dim);
+		for (int i=0; i<dim; i++) {
+			assertEquals(1, m.readBit(i, i));
+			m.writeBit(i, i, 0);
+		}
+		assert(m.isZero());
+		m.destroy();
 	}
 
 	@Test
 	public void testSrandom() {
-		//TODO
+		{
+			Mzd m1 = new Mzd(100,100);
+			Mzd.srandom(1);
+			m1.randomize();
+			Mzd m2 = new Mzd(100,100);
+			Mzd.srandom(1);
+			m2.randomize();
+			assert(m1.equals(m2));
+			m1.destroy();
+			m2.destroy();
+		}
 	}
 
 	@Test
 	public void testRowAdd() {
-		//TODO
+		{
+			int[][] arr =
+				{
+					{0,1,0,1,0},
+					{0,0,1,0,0},
+					{1,1,0,1,0},
+					{1,0,1,0,0}
+				};
+			int[][] arrTest =
+				{
+					{1,0,0,0,0},
+					{0,0,1,0,0},
+					{1,1,0,1,0},
+					{1,0,1,0,0}
+				};
+			Mzd m = new Mzd(arr);
+			m.rowAdd(2, 0);
+			Mzd mTest = new Mzd(arrTest);
+			assert(m.equals(mTest));
+			m.destroy();
+			mTest.destroy();
+		}
 	}
 
 	@Test
 	public void testRowClearOffset() {
-		//TODO
+		{
+			int[][] arr =
+				{
+					{0,0,0,0,0},
+					{0,0,1,1,1},
+					{0,0,0,0,0},
+					{0,0,0,0,0}
+				};
+			Mzd m = new Mzd(arr);
+			m.rowClearOffset(1, 2);
+			assert(m.isZero());
+			m.destroy();
+		}
 	}
 
 	@Test
 	public void testSubmatrix() {
-		//TODO
+		int[][] arr =
+			{
+				{0,1,0,1,0},
+				{0,0,1,0,0},
+				{1,1,0,1,0},
+				{1,0,1,0,0}
+			};
+		int[][] arrTest =
+			{
+				{1,0,1},
+				{0,1,0}
+			};
+		Mzd m = new Mzd(arr);
+		Mzd m2 = m.submatrix(null, 0, 1, 1, 4);
+		Mzd mTest = new Mzd(arrTest);
+		assert(m2.equals(mTest));
+		m.destroy();
+		m2.destroy();
+		mTest.destroy();
 	}
 
 	@Test

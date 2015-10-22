@@ -374,7 +374,7 @@ public class Mzd {
         this.sanityCheck();
         return (mzd_is_zero(this._mzd_t_pointer)!=0);
     }
-
+    
     
     /**
      * Naive cubic matrix multiplication.
@@ -441,7 +441,7 @@ public class Mzd {
         }
         return new Mzd(Cptr);
     }
-
+    
 	
     /**
      * Transpose a matrix. 
@@ -601,7 +601,7 @@ public class Mzd {
     /**
      * Copy a submatrix.
      * 
-     * This version takes M as a parameter and fills it in.
+     * This version takes the dest matrix M as a parameter and fills it in.
      * If M is null it allocates the matrix and returns it.
      * 
      * Note that the upper bounds are not included.
