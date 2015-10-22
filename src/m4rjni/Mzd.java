@@ -450,7 +450,10 @@ public class Mzd {
      *    [ C D ]  =  [BT DT] 
      *    
      *    and thus rearranges the blocks recursively.
-
+     *
+     * TODO: should make a static version of this that returns a new Mzd, and
+     * change this version so that is modifies this.
+     *
      * @return new matrix containing transpose.
      */
     private static native long mzd_transpose(long ptr);

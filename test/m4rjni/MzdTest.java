@@ -160,12 +160,49 @@ public class MzdTest {
 
 	@Test
 	public void testSolveLeft() {
-		//TODO	
+		{
+			Mzd a = new Mzd(30,30);
+			Mzd.srandom(1);
+			a.randomize();
+			Mzd x = new Mzd(30,30);
+			x.randomize();
+			Mzd b = a.multiply(x);
+			// actually if a and b aren't full rank the solution might not be unique
+			Mzd xsol = Mzd.solveLeft(a, b, 0, true);
+			assert(x.equals(xsol));
+			a.destroy();
+			b.destroy();
+			x.destroy();
+			xsol.destroy();
+		}
 	}
 
 	@Test
 	public void testKernelLeft() {
-		//TODO
+		{
+			// make a matrix with a non-trivial non-obvious nullspace
+			int dim = 30;
+			Mzd m = new Mzd(dim,dim);
+			Mzd.srandom(1);
+			m.randomize();
+			m.rowClearOffset(2, 0);
+			m.rowClearOffset(4, 0);
+			m.rowClearOffset(6, 0);
+			Mzd m2 = new Mzd(dim,dim);
+			m2.randomize();
+			Mzd a = m.multiply(m2);
+			Mzd x = a.kernelLeft(0);
+			Mzd b = a.multiply(x);
+			assert(b.isZero());
+			int aRank = a.echelonize(false);
+			int xRank = x.echelonize(false);
+			assertEquals(dim, aRank+xRank);
+			m.destroy();
+			m2.destroy();
+			a.destroy();
+			x.destroy();
+			b.destroy();
+		}
 	}
 
 	@Test
@@ -254,7 +291,9 @@ public class MzdTest {
 
 	@Test
 	public void testMultiply() {
-		//TODO
+		{
+			
+		}
 	}
 
 	@Test
@@ -285,10 +324,44 @@ public class MzdTest {
 		{
 			int[][] arr =
 				{
-					{0,1,0,1,0},
-					{0,0,1,0,0},
-					{1,1,0,1,0},
-					{1,0,1,0,0}
+					{0,1,0,1},
+					{0,0,1,0},
+					{1,1,0,1},
+					{1,0,1,0}
+				};
+			int[][] arrTest =
+				{
+					{0,0,1,1},
+					{1,0,1,0},
+					{0,1,0,1},
+					{1,0,1,0}
+				};
+			Mzd m = new Mzd(arr);
+			Mzd mt = m.transpose();
+			Mzd mTest = new Mzd(arrTest);
+			assert(mt.equals(mTest));
+			m.destroy();
+			mt.destroy();
+			mTest.destroy();
+		}
+	}
+	
+	@Test
+	public void testTranspose() {
+		{
+			int[][] arr =
+				{
+					{0,1,0,1},
+					{0,0,1,0},
+					{1,1,0,1},
+					{1,0,1,0}
+				};
+			int[][] arrTest =
+				{
+					{0,0,1,1},
+					{1,0,1,0},
+					{0,1,0,1},
+					{1,0,1,0}
 				};
 			Mzd m = new Mzd(arr);
 			Mzd ms = Mzd.add(m,m);
@@ -297,27 +370,85 @@ public class MzdTest {
 			ms.destroy();
 		}
 	}
-
-	@Test
-	public void testTranspose() {
-		//TODO
-	}
-
+	
 	@Test
 	public void testEqualsMzd() {
-		//TODO
+		{
+			int[][] arr =
+				{
+					{0,1,0,1},
+					{0,0,1,0},
+					{1,1,0,1},
+					{1,0,1,0}
+				};
+			Mzd m1 = new Mzd(arr);
+			Mzd m2 = new Mzd(arr);
+			assert(m1.equals(m2));
+			assert(m2.equals(m1));
+			m1.writeBit(0, 0, 1);
+			assert(! m1.equals(m2));
+			m1.destroy();
+			m2.destroy();
+		}
 	}
-
+	
 	@Test
 	public void testCopyRow() {
-		//TODO
+		{
+			int[][] arr =
+				{
+					{0,1,0,1},
+					{0,0,1,0},
+					{1,1,0,1},
+					{1,0,1,0}
+				};
+			int[][] arrTest =
+				{
+					{1,1,0,1},
+					{1,0,1,0},
+					{0,0,0,0},
+					{0,0,0,0}
+				};
+			Mzd m1 = new Mzd(arr);
+			Mzd m2 = new Mzd(4,4);
+			Mzd.copyRow(m2, 0, m1, 2);
+			Mzd.copyRow(m2, 1, m1, 3);
+			Mzd mTest = new Mzd(arrTest);
+			assert(m2.equals(mTest));
+			m1.destroy();
+			m2.destroy();
+			mTest.destroy();
+		}
 	}
-
+	
 	@Test
 	public void testCopyRows() {
-		//TODO
+		{
+			int[][] arr =
+				{
+					{0,1,0,1},
+					{0,0,1,0},
+					{1,1,0,1},
+					{1,0,1,0}
+				};
+			int[][] arrTest =
+				{
+					{1,1,0,1},
+					{1,0,1,0},
+					{0,0,0,0},
+					{0,0,0,0}
+				};
+			Mzd m1 = new Mzd(arr);
+			Mzd m2 = new Mzd(4,4);
+			Mzd.copyRows(m2, 0, m1, 2, 2);
+			Mzd mTest = new Mzd(arrTest);
+			assert(m2.equals(mTest));
+			m1.destroy();
+			m2.destroy();
+			mTest.destroy();
+		}
 	}
-
+	
 	@Test
 	public void testStandardBasis() {
 		int dim = 10;
