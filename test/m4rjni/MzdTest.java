@@ -219,6 +219,8 @@ public class MzdTest {
 	@Test
 	public void testInfo() {
 		//TODO
+		// this just prints some stuff to stdout.
+		// no good way to test this
 	}
 
 	@Test
@@ -292,7 +294,53 @@ public class MzdTest {
 	@Test
 	public void testMultiply() {
 		{
-			
+			int[][] arr1 =
+				{
+					{0,1,0,1,0},
+					{0,0,1,0,0},
+					{1,1,0,1,0},
+					{1,0,1,0,0}
+				};
+			int[][] arr2 =
+				{
+					{1,0,1,1},
+					{0,0,0,1},
+					{0,1,0,0},
+					{0,1,0,0},
+					{1,0,1,0}
+				};
+			int[][] arr12 = 
+				{
+					{0,1,0,1},
+					{0,1,0,0},
+					{1,1,1,0},
+					{1,1,1,1}
+				};
+			int[][] arr21 = 
+				{
+					{0,0,1,0,0},
+					{1,0,1,0,0},
+					{0,0,1,0,0},
+					{0,0,1,0,0},
+					{1,0,0,0,0}
+				};
+
+			Mzd m1 = new Mzd(arr1);
+			Mzd m2 = new Mzd(arr2);
+			Mzd m12 = new Mzd(arr12);
+			Mzd m21 = new Mzd(arr21);
+			Mzd b = m1.multiply(m2);
+			assert(b.equals(m12));
+			//b.print();
+			b.destroy();
+			b = m2.multiply(m1);
+			assert(b.equals(m21));
+			//b.print();
+			b.destroy();
+			m1.destroy();
+			m2.destroy();
+			m12.destroy();
+			m21.destroy();
 		}
 	}
 
@@ -556,7 +604,32 @@ public class MzdTest {
 
 	@Test
 	public void testVsIntersect() {
-		//TODO
+		{
+			// create two random matrices of less than full rank
+			Mzd A = new Mzd(20,100);
+			Mzd.srandom(1);
+			A.randomize();
+			Mzd B = new Mzd(30,100);
+			B.randomize();
+			
+			// compute a basis for the intersection of their rowspaces
+			Mzd C = Mzd.vsIntersect(A, B);
+			
+			// test that the span of C is in the span of both A and B
+			int aRank = A.echelonize(false);
+			int bRank = B.echelonize(false);
+			Mzd tmp = Mzd.stack(A, C);
+			int tRank = tmp.echelonize(false);
+			assertEquals(aRank,tRank);
+			tmp.destroy();
+			tmp = Mzd.stack(B, C);
+			tRank = tmp.echelonize(false);
+			assertEquals(bRank,tRank);
+			tmp.destroy();
+			A.destroy();
+			B.destroy();
+			C.destroy();
+		}
 	}
 
 }
