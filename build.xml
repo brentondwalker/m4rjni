@@ -10,7 +10,6 @@
     <pathelement location="lib/junit.jar"/>
     <pathelement location="lib/org.hamcrest.core_1.3.0.v201303031735.jar"/>
   </path>
-
 	
   <path id="m4rjni.classpath">
     <pathelement location="bin"/>
@@ -45,7 +44,7 @@
         <formatter type="xml"/>
         <test name="m4rjni.MzdTest" todir="${junit.output.dir}"/>
         <classpath refid="m4rjni.classpath"/>
-    	<sysproperty key="java.library.path" value="${java.library.path}:${user.dir}/lib:${user.dir}/ext/m4ri-20130416/.libs"/>
+    	<sysproperty key="java.library.path" value="${java.library.path}:${user.dir}/lib"/>
     </junit>
   </target>
 
@@ -78,6 +77,7 @@
 	<exec executable="bash">
 	  <arg line="-c 'cd ext; tar zxvf m4ri-20130416.tar.gz; cd m4ri-20130416; ./configure; make' " />
 	</exec>
+  	<copy file="ext/m4ri-20130416/.libs/libm4ri.so" todir="lib"/>
   </target>	
 
   <target name="doc">
