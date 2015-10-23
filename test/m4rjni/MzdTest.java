@@ -473,9 +473,16 @@ public class MzdTest {
 					{1,0,1,0}
 				};
 			Mzd m = new Mzd(arr);
-			Mzd mt = m.transpose();
+			
+			// test static version
+			Mzd mt = Mzd.transpose(m);
 			Mzd mTest = new Mzd(arrTest);
 			assert(mt.equals(mTest));
+			
+			// test object-oriented version
+			m.transpose();
+			assert(m.equals(mTest));
+			
 			m.destroy();
 			mt.destroy();
 			mTest.destroy();

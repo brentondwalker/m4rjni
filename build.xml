@@ -79,7 +79,16 @@
 	  <arg line="-c 'cd ext; tar zxvf m4ri-20130416.tar.gz; cd m4ri-20130416; ./configure; make' " />
 	</exec>
   </target>	
-	
+
+  <target name="doc">
+    <exec executable="javadoc">
+        <arg line="-d doc" />
+        <arg line="-sourcepath src" />
+        <arg line="-windowtitle m4rjni" />
+        <arg line="m4rjni" />
+    </exec>
+  </target>
+
   <target name="clean">
     <delete dir="./bin"/>
     <delete dir="./junit"/>

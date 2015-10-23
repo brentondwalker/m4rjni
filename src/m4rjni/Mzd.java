@@ -24,8 +24,8 @@ public class Mzd {
      * the main class variable is a pointer to the mzd_t object,
      * stored here as a long int. Also the matrix dimensions
      */
-    protected long _mzd_t_pointer = -1;
-    protected int _m, _n;
+    private long _mzd_t_pointer = -1;
+    private int _m, _n;
 	
     /**
      * native method to initialize m4ri data structures.
@@ -52,9 +52,11 @@ public class Mzd {
     }
 
     /**
-     * main() method just for demonstration.
+     * main() method.
+     * Makes the class executable and does some matrix ops
+     * just for demonstration.
      * 
-     * @param args
+     * @param args  command line args
      */
     public static void main(String[] args) {
     	Mzd m = new Mzd(10,10);
@@ -74,12 +76,12 @@ public class Mzd {
      * Useful method to run in each accessor before doing anything else.
      * Since we're dealing with the underlying m4ri objects it makes sense to be extra careful.
      */
-    protected void sanityCheck() {
+    private void sanityCheck() {
         if (_mzd_t_pointer==-1) {
         	throw new IllegalStateException("ERROR: called an Mzd method on an un-allocated matrix.");
         }
     }
-    protected void sanityCheck(int x, int y) {
+    private void sanityCheck(int x, int y) {
         if (_mzd_t_pointer==-1) {
         	throw new IllegalStateException("ERROR: called an Mzd method on an un-allocated matrix.");
         }
@@ -91,22 +93,25 @@ public class Mzd {
 	
     /**
      * Constructor
-     * @param m
-     * @param n
+     * Returns an m*n matrix of zeros.
+     * 
+     * @param m  number of rows
+     * @param n  number of cols
      */
-    private native long mzd_init(int m, int n);
     public Mzd(int m, int n) {
         _mzd_t_pointer = mzd_init(m,n);
         _m = m;
         _n = n;
         //System.out.println("mzd_t_pointer="+_mzd_t_pointer);
     }
-	
+    private native long mzd_init(int m, int n);
+
+    
     /**
      * Copy constructor
-     * @param A
+     * 
+     * @param A  matrix to copy
      */
-    private native long mzd_copy(long ptr);
     public Mzd(Mzd A) {
         if (A==null) {
         	throw new NullPointerException("ERROR: trying to use Mzd copy constructor with a null object!");
@@ -116,7 +121,9 @@ public class Mzd {
         _m = A._m;
         _n = A._n;
     }
-	
+    private native long mzd_copy(long ptr);
+
+    
     /**
      * Private internal constructor for when we have a mzd_t* that we
      * need to wrap in a Mzd object.
@@ -125,8 +132,6 @@ public class Mzd {
      * 
      * @param ptr
      */
-    private native static int mzd_get_nrows(long ptr);
-    private native static int mzd_get_ncols(long ptr);
     private Mzd(long ptr) {
         if (ptr == 0) {
             throw new NullPointerException("ERROR: trying to use wrapper constructor on a null object!");
@@ -135,14 +140,14 @@ public class Mzd {
         _m = mzd_get_nrows(ptr);
         _n = mzd_get_ncols(ptr);
     }
+    private native static int mzd_get_nrows(long ptr);
+    private native static int mzd_get_ncols(long ptr);
 	
 	
     /**
      * handy constructor to initialize a matrix from an array of integers.
      * 
-     *XXX this is not working right now!!
-     * 
-     * @param X
+     * @param X  array of int used to initialize the Mzd
      */
     public Mzd(int[][] X) {
         if (X==null) {
@@ -165,21 +170,23 @@ public class Mzd {
 	
 	
     /**
-     * Methods to deallocate the matrix
+     * Deallocate the matrix.
+     * Since this class allocates memory through JNI calls you *MUST* call this
+     * on every Mzd object when you are done with it.
      */
-    private native void mzd_destroy(long ptr);
     public void destroy() {
     	mzd_destroy(_mzd_t_pointer);
         _mzd_t_pointer = -1;
         _m = -1;
         _n = -1;
     }
+    private native void mzd_destroy(long ptr);
 	
 	
     /**
      * Get the number of rows in this object.
      * 
-     * @return
+     * @return  the number of rows
      */
     public int getNrows() {
         this.sanityCheck();
@@ -199,44 +206,43 @@ public class Mzd {
 	
 	
     /**
-     * Method to write a specified bit in the matrix
+     * Write a specified bit in the matrix
      * @param row
      * @param col
      * @param val
      */
-    private native void mzd_write_bit(long ptr, int row, int col, int val);
     public void writeBit(int row, int col, int val) {
     	//System.err.println("writeBit( "+row+" , "+col+" , "+val+" )");
     	//System.err.flush();
     	sanityCheck(row,col);
         mzd_write_bit(_mzd_t_pointer, row, col, val);
     }
+    private native void mzd_write_bit(long ptr, int row, int col, int val);
 
 	
     /**
-     * Method to read a specified bit in the matrix
+     * Read a specified bit from the matrix
      * @param row
      * @param col
-     * @param val
      */
-    private native int mzd_read_bit(long ptr, int row, int col);
     public int readBit(int row, int col) {
         sanityCheck(row,col);
         return mzd_read_bit(_mzd_t_pointer, row, col);
     }
+    private native int mzd_read_bit(long ptr, int row, int col);
 	
 
     /**
-     * Method to row-reduce a matrix
+     * Row-reduce a matrix
      * 
      * @param full - if true return reduced row echelon form, if false upper triangular
      * @return the rank of the matrix
      */
-    private native int mzd_echelonize(long ptr, boolean full);
     public int echelonize(boolean full) {
         sanityCheck();
         return mzd_echelonize(_mzd_t_pointer,full);
     }
+    private native int mzd_echelonize(long ptr, boolean full);
 
 	
     /**
@@ -249,7 +255,6 @@ public class Mzd {
      * @param inconsistency_check - decide whether or not to perform a check for incosistency (faster without but output not defined if system is not consistent). 
      * @return
      */
-    private native static int mzd_solve_left(long A, long B, int cutoff, boolean inconsistency_check);
     public static Mzd solveLeft(Mzd A, Mzd B, int cutoff, boolean inconsistency_check) {
         // need to copy A and B b/c they'll get overwritten,
         // and B will be our return value
@@ -263,6 +268,7 @@ public class Mzd {
         }
         return Btmp;
     }
+    private native static int mzd_solve_left(long A, long B, int cutoff, boolean inconsistency_check);
 	
 	
     /**
@@ -274,7 +280,6 @@ public class Mzd {
      * @param cutoff - Minimal dimension for Strassen recursion (default: 0).
      * @return
      */
-    private native long mzd_kernel_left_pluq(long A, int cutoff);
     public Mzd kernelLeft(int cutoff) {
         // need to copy A b/c it will get overwritten
         long Aptr = mzd_copy(this._mzd_t_pointer);
@@ -289,47 +294,48 @@ public class Mzd {
         }
         return new Mzd(Xptr);
     }
+    private native long mzd_kernel_left_pluq(long A, int cutoff);
 	
 	
     /**
      * Fill matrix M with uniformly distributed bits. 
      */
-    private native void mzd_randomize(long ptr);
     public void randomize() {
         this.sanityCheck();
         mzd_randomize(this._mzd_t_pointer);
     }
+    private native void mzd_randomize(long ptr);
 	
 
     /**
      * Print out the matrix.  Use this instead of trying toString().
      */
-    private native void mzd_print(long ptr);
     public void print() {
         this.sanityCheck();
         mzd_print(this._mzd_t_pointer);
     }
+    private native void mzd_print(long ptr);
 	
 	
     /**
      * Print out compact info about the matrix.
      */
-    private native void mzd_info(long ptr, boolean do_rank);
     public void info(boolean do_rank) {
         this.sanityCheck();
         mzd_info(this._mzd_t_pointer, do_rank);
     }
-	
+    private native void mzd_info(long ptr, boolean do_rank);
+
+    
     /**
      * Concatenate B to A and write the result to C.
      * That is,
-     * [ A ], [ B ] -> [ A  B ] = C
+     * [ A ], [ B ]  to  [ A  B ] = C
      * 
      * @param A
      * @param B
      * @return C
      */
-    private static native long mzd_concat(long Aptr, long Bptr);
     public static Mzd concat(Mzd A, Mzd B) {
         A.sanityCheck(); B.sanityCheck();
         long Cptr = mzd_concat(A._mzd_t_pointer, B._mzd_t_pointer);
@@ -338,19 +344,19 @@ public class Mzd {
         }
         return new Mzd(Cptr);
     }
+    private static native long mzd_concat(long Aptr, long Bptr);
 	
 	
     /**
      * Stack A on top of B and write the result to C.
      * That is,
-     * [ A ], [ B ] -> [ A ] = C
-     *                 [ B ]
+     * [ A ], [ B ]  to  [ A ] = C
+     *                   [ B ]
      * 
      * @param A
      * @param B
      * @return C
      */
-    private static native long mzd_stack(long Aptr, long Bptr);
     public static Mzd stack(Mzd A, Mzd B) {
         //System.out.println("stack()");
         A.sanityCheck(); B.sanityCheck();
@@ -362,6 +368,7 @@ public class Mzd {
         }
         return new Mzd(Cptr);
     }
+    private static native long mzd_stack(long Aptr, long Bptr);
 	
 	
     /**
@@ -369,11 +376,11 @@ public class Mzd {
      * 
      * @return true if the matrix==[0]
      */
-    private native int mzd_is_zero(long ptr);
     public boolean isZero() {
         this.sanityCheck();
         return (mzd_is_zero(this._mzd_t_pointer)!=0);
     }
+    private native int mzd_is_zero(long ptr);
     
     
     /**
@@ -385,7 +392,6 @@ public class Mzd {
      * @param B
      * @return C
      */
-    private static native long mzd_mul_naive(long Aptr, long Bptr);
     public static Mzd multiply(Mzd A, Mzd B) {
         A.sanityCheck();
         B.sanityCheck();
@@ -398,6 +404,7 @@ public class Mzd {
         }
         return new Mzd(Cptr);
     }
+    private static native long mzd_mul_naive(long Aptr, long Bptr);
 
     
     /**
@@ -456,9 +463,7 @@ public class Mzd {
      * Disposes of the old [this] matrix.
      * 
      * @param B
-     * @return C
      */
-    private static native long mzd_add(long Aptr, long Bptr);
     public void add(Mzd B) {
         this.sanityCheck();
         if (B._m != this._m || B._n != this._n) {
@@ -473,6 +478,7 @@ public class Mzd {
         this._m = mzd_get_nrows(Cptr);
         this._n = mzd_get_ncols(Cptr);
     }
+    private static native long mzd_add(long Aptr, long Bptr);
     
     
     /**
@@ -497,6 +503,32 @@ public class Mzd {
     
 	
     /**
+     * Transpose the matrix.
+     * This function uses the fact that:
+     *    [ A B ]T    [AT CT]
+     *    [ C D ]  =  [BT DT] 
+     *    
+     *    and thus rearranges the blocks recursively.
+     *
+     * This version replaces [this] with [this]', and disposes of the old matrix.
+     * It behaves like it is operating in-place.
+     *
+     */
+    public void transpose() {
+        this.sanityCheck();
+        long Dptr = mzd_transpose(this._mzd_t_pointer);
+        if (Dptr==0) {
+        	throw new NullPointerException("ERROR: transpose() - mzd_transpose() returned null");
+        }
+        mzd_destroy(this._mzd_t_pointer);
+        this._mzd_t_pointer = Dptr;
+        this._m = mzd_get_nrows(Dptr);
+        this._n = mzd_get_ncols(Dptr);
+    }
+    private static native long mzd_transpose(long ptr);
+    
+    
+    /**
      * Transpose a matrix. 
      * This function uses the fact that:
      *    [ A B ]T    [AT CT]
@@ -504,32 +536,32 @@ public class Mzd {
      *    
      *    and thus rearranges the blocks recursively.
      *
-     * TODO: should make a static version of this that returns a new Mzd, and
-     * change this version so that is modifies this.
+     * This is the static version that takes an Mzd and returns a new Mzd.
      *
+     * @param A
      * @return new matrix containing transpose.
      */
-    private static native long mzd_transpose(long ptr);
-    public Mzd transpose() {
-        this.sanityCheck();
-        long Dptr = mzd_transpose(this._mzd_t_pointer);
+    public static Mzd transpose(Mzd A) {
+        A.sanityCheck();
+        long Dptr = mzd_transpose(A._mzd_t_pointer);
         if (Dptr==0) {
             return null;
         }
         return new Mzd(Dptr);
     }
-	
+    
+    
     /**
      * Tests if B==this as matrices
      * 
      * @param B
      * @return true or false
      */
-    private static native int mzd_equal(long A, long B);
     public boolean equals(Mzd B) {
         this.sanityCheck();
         return (mzd_equal(this._mzd_t_pointer, B._mzd_t_pointer)!=0);
     }
+    private static native int mzd_equal(long A, long B);
 	
 	
     /**
@@ -543,7 +575,6 @@ public class Mzd {
      * @param A
      * @param j
      */
-    private native static void mzd_copy_row(long B, int i, long A, int j);
     public static void copyRow(Mzd B, int i, Mzd A, int j) {
         A.sanityCheck();
         B.sanityCheck();
@@ -553,6 +584,7 @@ public class Mzd {
         }
         mzd_copy_row(B._mzd_t_pointer, i, A._mzd_t_pointer, j);
     }
+    private native static void mzd_copy_row(long B, int i, long A, int j);
 	
 	
     /**
@@ -567,7 +599,6 @@ public class Mzd {
      * @param j
      * @param numRows
      */
-    private native static void mzd_copy_rows(long B, int i, long A, int j, int numRows);
     public static void copyRows(Mzd B, int i, Mzd A, int j, int numRows) {
         //System.out.println("copyRows("+B+" , "+i+" , "+A+" , "+j+" , "+numRows+")");
         //System.out.println("B:");
@@ -583,7 +614,9 @@ public class Mzd {
 		
         mzd_copy_rows(B._mzd_t_pointer, i, A._mzd_t_pointer, j, numRows);
     }
+    private native static void mzd_copy_rows(long B, int i, long A, int j, int numRows);
 
+    
     /**
      * Return an array of dim vectors from the standard basis
      * 
@@ -621,10 +654,10 @@ public class Mzd {
      * 
      * @param seed
      */
-    private native static void m4ri_srandom(int seed);
     public static void srandom(int seed) {
         m4ri_srandom(seed);
     }
+    private native static void m4ri_srandom(int seed);
 	
 
     /**
@@ -633,12 +666,12 @@ public class Mzd {
      * @param srcRow
      * @param dstRow
      */
-    private native void m4ri_row_add(long M, int srcRow, int dstRow);
     public void rowAdd(int srcRow, int dstRow) {
         this.sanityCheck(srcRow,0);
         this.sanityCheck(dstRow,0);
         m4ri_row_add(this._mzd_t_pointer, srcRow, dstRow);
     }
+    private native void m4ri_row_add(long M, int srcRow, int dstRow);
 	
 	
     /**
@@ -647,11 +680,11 @@ public class Mzd {
      * @param row
      * @param colOffset
      */
-    private native void m4ri_row_clear_offset(long M, int row, int colOffset);
     public void rowClearOffset(int row, int colOffset) {
         this.sanityCheck(row,colOffset);
         m4ri_row_clear_offset(this._mzd_t_pointer, row, colOffset);
     }
+    private native void m4ri_row_clear_offset(long M, int row, int colOffset);
 	
 	
     /**
@@ -662,14 +695,13 @@ public class Mzd {
      * 
      * Note that the upper bounds are not included.
      * 
-     * @param M
+     * @param S  destination matrix (if null it will be allocated and returned)
      * @param lowr   - start row
      * @param lowc   - start column
      * @param highr  - stop row
      * @param highc  - stop column
      * @return
      */
-    private native long m4ri_submatrix(long S, long M, int lowr, int lowc, int highr, int highc);
     public Mzd submatrix(Mzd S, int lowr, int lowc, int highr, int highc) {
         //System.out.println("submatrix("+lowr+","+lowc+","+highr+","+highc+")");
         this.sanityCheck(lowr, lowc);
@@ -691,9 +723,12 @@ public class Mzd {
 		
         return S;
     }
+    private native long m4ri_submatrix(long S, long M, int lowr, int lowc, int highr, int highc);
 	
 	
     /**
+     * Return a matrix whose rows span the intersection of the rowspaces of U and W.
+     * 
      * Not a direct interface to an m4ri routine, this is a natural place to
      * put this functionality.  This computes a basis for the intersection of
      * the rowspace of two matrices (same column dimension).
@@ -716,7 +751,7 @@ public class Mzd {
         Mzd UW = stack(U,W);
         //System.out.println("\nUW:");
         //UW.print();
-        Mzd UWt = UW.transpose();
+        Mzd UWt = Mzd.transpose(UW);
         //System.out.println("\nUWt:");
         //UWt.print();
         Mzd N = UWt.kernelLeft(0);
@@ -731,7 +766,7 @@ public class Mzd {
         Mzd NU = N.submatrix(null, 0, 0, U.getNrows(), N.getNcols());
         //System.out.println("\nNU:");
         //NU.print();
-        Mzd NUt = NU.transpose();
+        Mzd NUt = Mzd.transpose(NU);
         //System.out.println("\nNUt:");
         //NUt.print();
 		
