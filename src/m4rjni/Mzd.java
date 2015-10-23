@@ -169,7 +169,7 @@ public class Mzd {
      */
     private native void mzd_destroy(long ptr);
     public void destroy() {
-        mzd_destroy(_mzd_t_pointer);
+    	mzd_destroy(_mzd_t_pointer);
         _mzd_t_pointer = -1;
         _m = -1;
         _n = -1;
@@ -379,46 +379,99 @@ public class Mzd {
     /**
      * Naive cubic matrix multiplication.
      * 
-     * Compute C such that C == [this][B].
+     * Compute C such that [C] == [A][B].
      * 
+     * @param A
      * @param B
      * @return C
      */
     private static native long mzd_mul_naive(long Aptr, long Bptr);
-    public Mzd multiply(Mzd B) {
-        this.sanityCheck();
-        if (B._m != this._n) {
-            System.out.println("ERROR: Multiply() - inner dimensions of matrices don't match.");
-            return null;
+    public static Mzd multiply(Mzd A, Mzd B) {
+        A.sanityCheck();
+        B.sanityCheck();
+        if (B._m != A._n) {
+        	throw new IllegalArgumentException("ERROR: multiply() - inner dimensions of matrices don't match.");
         }
-        long Cptr = mzd_mul_naive(this._mzd_t_pointer, B._mzd_t_pointer);
+        long Cptr = mzd_mul_naive(A._mzd_t_pointer, B._mzd_t_pointer);
         if (Cptr==0) {
             return null;
         }
         return new Mzd(Cptr);
     }
-	
+
+    
+    /**
+     * Naive cubic matrix multiplication on the right.
+     * 
+     * Object-oriented version.
+     * Replaces [this] with [this][B].
+     * Disposes of the old [this] matrix.
+     * 
+     * @param B
+     */
+    public void multiplyRight(Mzd B) {
+        this.sanityCheck();
+        if (B._m != this._n) {
+            throw new IllegalArgumentException("ERROR: multiplyRight() - inner dimensions of matrices don't match.");
+        }
+        long Cptr = mzd_mul_naive(this._mzd_t_pointer, B._mzd_t_pointer);
+        if (Cptr==0) {
+        	throw new NullPointerException("ERROR: multiplyRight() - multiply returned NULL");
+        }
+        mzd_destroy(this._mzd_t_pointer);
+        this._mzd_t_pointer = Cptr;
+        this._m = mzd_get_nrows(Cptr);
+        this._n = mzd_get_ncols(Cptr);
+    }
+
+    
+    /**
+     * Naive cubic matrix multiplication on the left.
+     * 
+     * Object-oriented version.
+     * Replaces [this] with [this][B].
+     * Disposes of the old [this] matrix.
+     * 
+     * @param B
+     */
+    public void multiplyLeft(Mzd B) {
+        this.sanityCheck();
+        if (this._m != B._n) {
+            throw new IllegalArgumentException("ERROR: multiplyLeft() - inner dimensions of matrices don't match.");
+        }
+        long Cptr = mzd_mul_naive(B._mzd_t_pointer, this._mzd_t_pointer);
+        if (Cptr==0) {
+        	throw new NullPointerException("ERROR: multiplyLeft() - multiply returned NULL");
+        }
+        mzd_destroy(this._mzd_t_pointer);
+        this._mzd_t_pointer = Cptr;
+        this._m = mzd_get_nrows(Cptr);
+        this._n = mzd_get_ncols(Cptr);
+    }
+
 	
     /** 
-     * Compute new matrix C such that C == [this] + [B].
+     * Computes [this] = [this] + [B].
      * 
-     * I am pretty sure this gives a new Mzd object that needs to be disposed later
-     * Non-static version, operates on "this".
+     * Disposes of the old [this] matrix.
      * 
      * @param B
      * @return C
      */
     private static native long mzd_add(long Aptr, long Bptr);
-    public Mzd add(Mzd B) {
+    public void add(Mzd B) {
         this.sanityCheck();
         if (B._m != this._m || B._n != this._n) {
         	throw new IllegalArgumentException("ERROR: Mzd.add() - dimensions of matrices don't match.");
         }
         long Cptr = mzd_add(this._mzd_t_pointer, B._mzd_t_pointer);
         if (Cptr==0) {
-            return null;
+        	throw new NullPointerException("ERROR: multiplyRight() - multiply returned NULL");
         }
-        return new Mzd(Cptr);
+        mzd_destroy(this._mzd_t_pointer);
+        this._mzd_t_pointer = Cptr;
+        this._m = mzd_get_nrows(Cptr);
+        this._n = mzd_get_ncols(Cptr);
     }
     
     
@@ -682,7 +735,7 @@ public class Mzd {
         //System.out.println("\nNUt:");
         //NUt.print();
 		
-        Mzd S = NUt.multiply(U);
+        Mzd S = Mzd.multiply(NUt,U);
         int urank = S.echelonize(false);
 		
         UW.destroy();

@@ -166,7 +166,7 @@ public class MzdTest {
 			a.randomize();
 			Mzd x = new Mzd(30,30);
 			x.randomize();
-			Mzd b = a.multiply(x);
+			Mzd b = Mzd.multiply(a,x);
 			// actually if a and b aren't full rank the solution might not be unique
 			Mzd xsol = Mzd.solveLeft(a, b, 0, true);
 			assert(x.equals(xsol));
@@ -190,9 +190,9 @@ public class MzdTest {
 			m.rowClearOffset(6, 0);
 			Mzd m2 = new Mzd(dim,dim);
 			m2.randomize();
-			Mzd a = m.multiply(m2);
+			Mzd a = Mzd.multiply(m,m2);
 			Mzd x = a.kernelLeft(0);
-			Mzd b = a.multiply(x);
+			Mzd b = Mzd.multiply(a,x);
 			assert(b.isZero());
 			int aRank = a.echelonize(false);
 			int xRank = x.echelonize(false);
@@ -329,11 +329,11 @@ public class MzdTest {
 			Mzd m2 = new Mzd(arr2);
 			Mzd m12 = new Mzd(arr12);
 			Mzd m21 = new Mzd(arr21);
-			Mzd b = m1.multiply(m2);
+			Mzd b = Mzd.multiply(m1,m2);
 			assert(b.equals(m12));
 			//b.print();
 			b.destroy();
-			b = m2.multiply(m1);
+			b = Mzd.multiply(m2,m1);
 			assert(b.equals(m21));
 			//b.print();
 			b.destroy();
@@ -345,12 +345,84 @@ public class MzdTest {
 	}
 
 	@Test
+	public void testMultiplyRight() {
+		{
+			int[][] arr1 =
+				{
+					{0,1,0,1,0},
+					{0,0,1,0,0},
+					{1,1,0,1,0},
+					{1,0,1,0,0}
+				};
+			int[][] arr2 =
+				{
+					{1,0,1,1},
+					{0,0,0,1},
+					{0,1,0,0},
+					{0,1,0,0},
+					{1,0,1,0}
+				};
+			int[][] arr12 = 
+				{
+					{0,1,0,1},
+					{0,1,0,0},
+					{1,1,1,0},
+					{1,1,1,1}
+				};
+
+			Mzd m1 = new Mzd(arr1);
+			Mzd m2 = new Mzd(arr2);
+			Mzd m12 = new Mzd(arr12);
+			m1.multiplyRight(m2);
+			assert(m1.equals(m12));
+			m1.destroy();
+			m2.destroy();
+			m12.destroy();
+		}
+	}	
+
+	@Test
+	public void testMultiplyLeft() {
+		{
+			int[][] arr1 =
+				{
+					{0,1,0,1,0},
+					{0,0,1,0,0},
+					{1,1,0,1,0},
+					{1,0,1,0,0}
+				};
+			int[][] arr2 =
+				{
+					{1,0,1,1},
+					{0,0,0,1},
+					{0,1,0,0},
+					{0,1,0,0},
+					{1,0,1,0}
+				};
+			int[][] arr21 = 
+				{
+					{0,0,1,0,0},
+					{1,0,1,0,0},
+					{0,0,1,0,0},
+					{0,0,1,0,0},
+					{1,0,0,0,0}
+				};
+
+			Mzd m1 = new Mzd(arr1);
+			Mzd m2 = new Mzd(arr2);
+			Mzd m21 = new Mzd(arr21);
+			m1.multiplyLeft(m2);
+			assert(m1.equals(m21));
+			m1.destroy();
+			m2.destroy();
+			m21.destroy();
+		}
+	}
+
+	
+	@Test
 	public void testAddMzd() {
-		// this one behaves not like you'd expect.
-		// calling m.add(n) you'd expect the result to modify m,
-		// but in fact m is unchanged and it returns a new matrix.
-		// maybe should change this.  But it would be hiding the
-		// underlying behavior of m4ri.
+		// object-oriented version
 		{
 			int[][] arr =
 				{
@@ -360,11 +432,27 @@ public class MzdTest {
 					{1,0,1,0,0}
 				};
 			Mzd m = new Mzd(arr);
-			Mzd ms = m.add(m);
+			m.add(m);
+			assert(m.isZero());
+			m.destroy();
+		}
+		
+		// static version
+		{
+			int[][] arr =
+				{
+					{0,1,0,1,0},
+					{0,0,1,0,0},
+					{1,1,0,1,0},
+					{1,0,1,0,0}
+				};
+			Mzd m = new Mzd(arr);
+			Mzd ms = Mzd.add(m,m);
 			assert(ms.isZero());
 			m.destroy();
 			ms.destroy();
 		}
+		
 	}
 
 	@Test
