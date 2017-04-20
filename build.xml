@@ -10,16 +10,16 @@
     <pathelement location="lib/junit.jar"/>
     <pathelement location="lib/org.hamcrest.core_1.3.0.v201303031735.jar"/>
   </path>
-	
+  
   <path id="m4rjni.classpath">
     <pathelement location="bin"/>
     <path refid="JUnit 4.libraryclasspath"/>
   </path>
-	
+  
   <!--
-  <property environment="env"/>
-  <echo message="JAVA_HOME is set to = ${env.JAVA_HOME}" />
-  <echoproperties/>
+      <property environment="env"/>
+      <echo message="JAVA_HOME is set to = ${env.JAVA_HOME}" />
+      <echoproperties/>
   -->
 
   <tstamp>
@@ -30,21 +30,21 @@
   
   <target name="build" description="Compile the classes">
     <mkdir dir="bin"/>
-  	<javac srcdir="src/" destdir="bin" deprecation="on" includeantruntime="false" />
+    <javac srcdir="src/" destdir="bin" deprecation="on" includeantruntime="false" />
   </target>
 
   <target name="test" depends="jni,m4rjni.MzdTest" />
   <target name="m4rjni.MzdTest">
-  	<javac srcdir="test/" destdir="bin" deprecation="on" includeantruntime="false">
+    <javac srcdir="test/" destdir="bin" deprecation="on" includeantruntime="false">
       <classpath refid="m4rjni.classpath"/>
     </javac>
     <mkdir dir="${junit.output.dir}"/>
-  	<!-- the fork=yes here is essential, since we want the VM invoked with a different java.library.path -->
+    <!-- the fork=yes here is essential, since we want the VM invoked with a different java.library.path -->
     <junit fork="yes" printsummary="withOutAndErr">
-        <formatter type="xml"/>
-        <test name="m4rjni.MzdTest" todir="${junit.output.dir}"/>
-        <classpath refid="m4rjni.classpath"/>
-    	<sysproperty key="java.library.path" value="${java.library.path}:${user.dir}/lib"/>
+      <formatter type="xml"/>
+      <test name="m4rjni.MzdTest" todir="${junit.output.dir}"/>
+      <classpath refid="m4rjni.classpath"/>
+      <sysproperty key="java.library.path" value="${java.library.path}:${user.dir}/lib"/>
     </junit>
   </target>
 
@@ -53,9 +53,9 @@
   </target>
   
   <target name="jni"  depends="headers" description="Build the JNI lib">
-  	<mkdir dir="lib"/>
+    <mkdir dir="lib"/>
     <exec executable="gcc">
-   	  <arg line="-c" />
+      <arg line="-c" />
       <arg line="-std=gnu99" />
       <arg line="-fPIC"/>
       <arg line="jni/m4rjni.c" />
@@ -64,37 +64,41 @@
       <arg line="-I${java.home}/../include/linux/" />
       <arg line="-Iext/m4ri-20130416/" />
     </exec>
-  	<exec executable="gcc">
+    <exec executable="gcc">
       <arg line="-shared" />
-  	  <arg line="lib/m4rjni.o" />
+      <arg line="-Llib" />
+      <arg line="lib/m4rjni.o" />
       <arg line="-o lib/libm4rjni.so" />
-  	  <arg line="-lm4ri" />
-  	</exec>
+      <arg line="-lm4ri" />
+    </exec>
   </target>
   
   <target name="m4ri" description="Build the m4ri library from source">
-  	<!-- the latest release of m4ri (20140914) is full of bugs!  Use the older version. -->
-	<exec executable="bash">
-	  <arg line="-c 'cd ext; tar zxvf m4ri-20130416.tar.gz; cd m4ri-20130416; ./configure; make' " />
-	</exec>
-  	<copy file="ext/m4ri-20130416/.libs/libm4ri.so" todir="lib"/>
+    <!-- the latest release of m4ri (20140914) is full of bugs!  Use the older version. -->
+    <exec executable="bash">
+      <arg line="-c 'cd ext; tar zxvf m4ri-20130416.tar.gz; cd m4ri-20130416; ./configure; make' " />
+    </exec>
+    <copy todir="lib">
+      <fileset dir="ext/m4ri-20130416/.libs" />
+      <globmapper from="*.so" to="*.so" />
+    </copy>
   </target>	
 
   <target name="doc">
     <exec executable="javadoc">
-        <arg line="-d doc" />
-        <arg line="-sourcepath src" />
-        <arg line="-windowtitle m4rjni" />
-        <arg line="m4rjni" />
+      <arg line="-d doc" />
+      <arg line="-sourcepath src" />
+      <arg line="-windowtitle m4rjni" />
+      <arg line="m4rjni" />
     </exec>
   </target>
-
+  
   <target name="clean">
     <delete dir="./bin"/>
     <delete dir="./junit"/>
     <delete file="./lib/m4rjni.o"/>
-  	<delete file="./lib/libm4rjni.so"/>
+    <delete file="./lib/libm4rjni.so"/>
     <!-- <delete file="./jni/m4rjni_Mzd.h"/> -->
   </target>
-
+  
 </project>

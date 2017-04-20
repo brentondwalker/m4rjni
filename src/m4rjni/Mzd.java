@@ -39,16 +39,20 @@ public class Mzd {
         /*
          * load the necessary shared libraries
          */
-    	//System.err.println("Attempt to load libraries...");
-		//String s = System.getProperty("java.library.path");
-		//System.err.println("java.library.path = "+s);
-		//s = System.getProperty("user.dir");
-		//System.err.println("user.dir = "+s);
-    	
-    	System.loadLibrary("m4rjni");
-        System.loadLibrary("m4ri");
-
-        m4rjni.Mzd.m4ri_init();
+	try {
+	    System.loadLibrary("m4rjni");
+	    System.loadLibrary("m4ri");
+	} catch (UnsatisfiedLinkError e) {
+	    System.err.println("Native code library failed to load.\n" + e);
+	    System.err.println("Current library path: "+System.getProperty("java.library.path"));
+	    System.exit(1);
+	}
+	try {
+	    m4rjni.Mzd.m4ri_init();
+	} catch (Exception e) {
+	    System.err.println("ERROR: failed to initialize m4ri.\n"+e);
+	    System.exit(1);
+	}
     }
 
     /**
@@ -71,7 +75,7 @@ public class Mzd {
     	m.print();
     }
     
-	
+    
     /**
      * Useful method to run in each accessor before doing anything else.
      * Since we're dealing with the underlying m4ri objects it makes sense to be extra careful.
