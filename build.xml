@@ -8,7 +8,7 @@
   
   <path id="JUnit 4.libraryclasspath">
     <pathelement location="lib/junit.jar"/>
-    <pathelement location="lib/org.hamcrest.core_1.3.0.v201303031735.jar"/>
+    <pathelement location="lib/hamcrest-core-1.3.jar"/>
   </path>
   
   <path id="m4rjni.classpath">
@@ -40,11 +40,17 @@
     </javac>
     <mkdir dir="${junit.output.dir}"/>
     <!-- the fork=yes here is essential, since we want the VM invoked with a different java.library.path -->
-    <junit fork="yes" printsummary="withOutAndErr">
+    <junit fork="yes" printsummary="yes">
       <formatter type="xml"/>
+      <classpath>
+	<path refid="m4rjni.classpath" />
+	<fileset dir="lib">
+          <include name="**/junit.jar" />
+        </fileset>
+      </classpath>
       <test name="m4rjni.MzdTest" todir="${junit.output.dir}"/>
-      <classpath refid="m4rjni.classpath"/>
       <sysproperty key="java.library.path" value="${java.library.path}:${user.dir}/lib"/>
+      <env key="LD_LIBRARY_PATH" path="${env.LD_LIBRARY_PATH}:lib" />
     </junit>
   </target>
 
@@ -96,8 +102,14 @@
   <target name="clean">
     <delete dir="./bin"/>
     <delete dir="./junit"/>
+    <delete dir="./ext/m4ri-20130416"/>
     <delete file="./lib/m4rjni.o"/>
     <delete file="./lib/libm4rjni.so"/>
+    <delete file="./jni/m4rjni_Mzd.h"/>
+    <delete>
+      <fileset dir="lib" includes="*.so"/>
+      <fileset dir="lib" includes="*.o"/>
+    </delete>
     <!-- <delete file="./jni/m4rjni_Mzd.h"/> -->
   </target>
   
