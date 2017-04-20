@@ -82,7 +82,7 @@
   <target name="m4ri" description="Build the m4ri library from source">
     <!-- the latest release of m4ri (20140914) is full of bugs!  Use the older version. -->
     <exec executable="bash">
-      <arg line="-c 'cd ext; tar zxvf m4ri-20130416.tar.gz; cd m4ri-20130416; ./configure; make' " />
+      <arg line="-c 'cd ext; tar zxf m4ri-20130416.tar.gz; cd m4ri-20130416; ./configure; make' " />
     </exec>
     <copy todir="lib">
       <fileset dir="ext/m4ri-20130416/.libs" />
