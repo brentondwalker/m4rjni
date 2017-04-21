@@ -1,6 +1,12 @@
 # m4rjni
 Java JNI bindings for m4ri finite field linear algebra library
 
+
+ API Documentation
+------------
+[Javadoc](http://brentondwalker.github.io/m4rjni/docs/)
+
+
  Quickstart
 ------------
 
