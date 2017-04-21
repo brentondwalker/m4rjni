@@ -90,9 +90,9 @@
     </copy>
   </target>	
 
-  <target name="doc">
+  <target name="docs">
     <exec executable="javadoc">
-      <arg line="-d doc" />
+      <arg line="-d docs" />
       <arg line="-sourcepath src" />
       <arg line="-windowtitle m4rjni" />
       <arg line="m4rjni" />
