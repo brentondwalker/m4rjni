@@ -99,6 +99,20 @@
     </exec>
   </target>
   
+  <target name="jar" depends="jni">
+    <delete file="m4rjni.jar"/>
+    <delete file="MANIFEST.MF"/>
+    <manifest file="MANIFEST.MF">
+      <attribute name="Manifest-Version" value="1.0"/>
+      <attribute name="Main-Class" value="Mzd"/>
+      <attribute name="Class-Path" value="bin"/>
+    </manifest>
+    <jar destfile="m4rjni.jar" manifest="MANIFEST.MF">
+      <fileset dir="bin" includes="**/*.class" />
+      <fileset dir="src" includes="**/*.java" />
+    </jar>
+  </target>
+
   <target name="clean">
     <delete dir="./bin"/>
     <delete dir="./junit"/>

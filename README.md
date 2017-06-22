@@ -28,3 +28,10 @@ Java JNI bindings for m4ri finite field linear algebra library
 4. Run unit tests
 
   ant test
+
+
+5. build the jar file
+
+  ant jar
+
+
