@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
+<!--
+This version uses javah to generate the c headers from the java code in Mzd.java.
+That was deprecated after java 8, so the current build.xml uses the new nativeHeaderDir
+attribute to generate the headers with javac.  I'm checking in this older version in 
+case someone wants to build it with java 8 or older.
+-->
+
 <project name="m4rijni" default="jni" basedir=".">
 
   <property name="version" value="0.1"/>
@@ -30,7 +37,7 @@
   
   <target name="build" description="Compile the classes">
     <mkdir dir="bin"/>
-    <javac srcdir="src/" destdir="bin" deprecation="on" includeantruntime="false" nativeHeaderDir="jni/" />
+    <javac srcdir="src/" destdir="bin" deprecation="on" includeantruntime="false" />
   </target>
 
   <target name="test" depends="jni,m4rjni.MzdTest" />
@@ -54,13 +61,11 @@
     </junit>
   </target>
 
-  <!--  Deprecated as of java 10.  Replaced with 'nativeHeaderDir="jni/"' in the "build" target above.
   <target name="headers" depends="build" description="Create JNI header">
-    <javah destdir="./jni" force="yes" classpath="bin" class="m4rjni.Mzd" />  
+    <javah destdir="./jni" force="yes" classpath="bin" class="m4rjni.Mzd" />
   </target>
-  -->
   
-  <target name="jni"  depends="build" description="Build the JNI lib">
+  <target name="jni"  depends="headers" description="Build the JNI lib">
     <mkdir dir="lib"/>
     <exec executable="gcc">
       <arg line="-c" />
