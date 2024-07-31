@@ -68,8 +68,8 @@
       <arg line="-fPIC"/>
       <arg line="jni/m4rjni.c" />
       <arg line="-o lib/m4rjni.o" />
-      <arg line="-I${java.home}/../include/" />
-      <arg line="-I${java.home}/../include/linux/" />
+      <arg line="-I${java.home}/include/" />
+      <arg line="-I${java.home}/include/linux/" />
       <arg line="-Iext/m4ri-20130416/" />
     </exec>
     <exec executable="gcc">
